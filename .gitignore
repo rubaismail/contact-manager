@@ -1,0 +1,106 @@
+# -------------------------
+# Environment / Secrets
+# -------------------------
+.env
+.env.*
+!.env.example
+
+config.php
+config.local.php
+secrets.php
+
+# -------------------------
+# Database dumps / backups
+# -------------------------
+*.sql
+*.sql.gz
+*.dump
+*.bak
+
+# Keep schema/sample SQL if you store them here
+!database/schema.sql
+!database/seed.sql
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+logs/
+log/
+
+# -------------------------
+# PHP dependencies
+# -------------------------
+vendor/
+
+# Composer local files
+composer.phar
+
+# -------------------------
+# Temporary / cache files
+# -------------------------
+tmp/
+temp/
+cache/
+*.tmp
+*.temp
+
+# -------------------------
+# User uploads
+# -------------------------
+uploads/*
+!uploads/.gitkeep
+
+# -------------------------
+# IDE / Editor files
+# -------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -------------------------
+# macOS
+# -------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# -------------------------
+# Windows
+# -------------------------
+Thumbs.db
+desktop.ini
+
+# -------------------------
+# Linux
+# -------------------------
+*~
+.fuse_hidden*
+.directory
+
+# -------------------------
+# Frontend dependencies
+# Only relevant if you use npm
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------
+# Deployment / server files
+# -------------------------
+*.pem
+*.key
+*.crt
+
+# Apache local configuration
+.htpasswd
+
+# -------------------------
+# Miscellaneous backups
+# -------------------------
+*.orig
+*.old
+*.backup
