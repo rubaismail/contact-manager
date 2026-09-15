@@ -4,23 +4,25 @@ require_once 'config.php';
 require_once 'api_utils.php';
 
 
+$userID = requireAuth();
+
 $request = getRequestInfo();
 
+
+
 if (
-    !isset($request['ID']) ||
-    !isset($request['UserID']) ||
-    !isset($request['FirstName']) ||
-    !isset($request['LastName']) ||
-    !isset($request['Phone']) ||
-    !isset($request['Email'])
+    empty($request['ID']) ||
+    empty($request['FirstName']) ||
+    empty($request['LastName']) ||
+    empty($request['Phone']) ||
+    empty($request['Email']) 
 ) {
-    sendError("One of the fields is missing");
+    sendError("One or more of the fields are missing");
     exit();
 }
 
-// Store the request parameters in variables
-$contactID = ($request['ID']);
-$userID = ($request['UserID']);
+
+$contactID = $request['ID'];
 $firstName = trim($request['FirstName']);
 $lastName = trim($request['LastName']);
 $phone = trim($request['Phone']);
@@ -32,7 +34,7 @@ if (
     $phone === "" ||
     $email === ""
 ) {
-    sendError("One of the fields is missing");
+    sendError("One or more of the fields are missing");
     exit();
 }
 
@@ -40,9 +42,8 @@ if (
 $stmt = $conn->prepare(
     "SELECT ID FROM Contacts WHERE ID = ? AND UserID = ?"
 );
-
 if (!$stmt){
-    sendError("Database error");
+    sendError("Database error", 500);
     exit();
 }
 
@@ -52,7 +53,7 @@ $stmt->store_result();
 
 if ($stmt->num_rows === 0) {
     $stmt->close();
-    sendError("No results found");
+    sendError("No results found", 404);
     exit();
 }
 
@@ -67,7 +68,7 @@ $stmt = $conn->prepare(
 );
 
 if (!$stmt) {
-    sendError("Database error");
+    sendError("Database error", 500);
     exit();
 }
 
@@ -88,7 +89,7 @@ if ($stmt->execute()) {
         "message" => "Contact updated successfully"
     ]);
 } else {
-    sendError("Failed to update contact");
+    sendError("Failed to update contact", 500);
 }
 
 $stmt->close();

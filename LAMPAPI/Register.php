@@ -12,7 +12,7 @@ if (
     !isset($request['Username']) ||
     !isset($request['Password'])
 ) {
-    sendError("One of the fields is missing");
+    sendError("One or more of the fields are missing");
     exit();
 }
 
@@ -30,7 +30,7 @@ if (
     $password === ""
 
     ) {
-        sendError("One of the fields is missing");
+        sendError("One or more of the fields are missing");
         exit();
     }
 
