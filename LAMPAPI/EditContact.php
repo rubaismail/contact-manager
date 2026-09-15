@@ -11,11 +11,11 @@ $request = getRequestInfo();
 
 
 if (
-    empty($request['ID']) ||
-    empty($request['FirstName']) ||
-    empty($request['LastName']) ||
-    empty($request['Phone']) ||
-    empty($request['Email']) 
+    !isset($request['ID']) ||
+    !isset($request['FirstName']) ||
+    !isset($request['LastName']) ||
+    !isset($request['Phone']) ||
+    !isset($request['Email'])
 ) {
     sendError("One or more of the fields are missing");
     exit();
