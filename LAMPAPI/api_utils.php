@@ -5,7 +5,7 @@
 // API Utility Functions
 // ============================================
 
-session start();
+session_start();
 
 function getRequestInfo()
 {
