@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$envFile = dirname(__DIR__) . '/.env';
+$envFile = dirname(__DIR__, 2) . '/.env';
 $fileEnv = [];
 
 if (is_readable($envFile)) {
