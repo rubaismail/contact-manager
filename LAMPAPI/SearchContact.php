@@ -14,9 +14,9 @@ if (!isset($request['query'])) {
 
 $query = trim($request['query']);
 
-// Pagination — default page 1, 10 per page
+// Pagination — default 10 per page, capped at 100 per request
 $page  = isset($request['page']) ? max(1, (int) $request['page']) : 1;
-$limit = isset($request['limit']) ? max(1, (int) $request['limit']) : 10;
+$limit = isset($request['limit']) ? min(100, max(1, (int) $request['limit'])) : 10;
 $offset = ($page - 1) * $limit;
 
 $searchTerm = "%" . $query . "%";
