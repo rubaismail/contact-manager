@@ -160,7 +160,3 @@ git pull --ff-only origin main
 ```
 
 Keep production secrets outside source control and verify database migrations before deploying API changes.
-
-## Contributing
-
-Create a focused branch, commit related changes together, and open a pull request into `main`. Keep API contracts and project documentation synchronized whenever endpoint behavior changes.
