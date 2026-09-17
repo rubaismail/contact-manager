@@ -1,0 +1,672 @@
+openapi: 3.0.3
+
+info:
+  title: Contact Manager API
+  version: 1.0.0
+  description: |
+    JSON API for user authentication and per-user contact management.
+
+    All operations use POST requests with JSON object bodies. Login creates a
+    PHP session. Clients must retain and resend the PHPSESSID cookie when
+    calling protected contact endpoints.
+
+servers:
+  - url: http://team11.store
+    description: Deployed Contact Manager server
+
+tags:
+  - name: Authentication
+    description: Account registration and login
+  - name: Contacts
+    description: Authenticated contact management
+
+paths:
+  /LAMPAPI/Register.php:
+    post:
+      tags:
+        - Authentication
+      summary: Register a user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              FirstName: Jane
+              LastName: Doe
+              Username: jdoe
+              Password: example-password
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedUserResponse'
+              example:
+                success: true
+                data:
+                  ID: 3
+                message: User registered successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '409':
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Username already exists
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /LAMPAPI/Login.php:
+    post:
+      tags:
+        - Authentication
+      summary: Log in a user
+      description: Verifies credentials and creates the PHP session used by protected endpoints.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              Username: jdoe
+              Password: example-password
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: PHP session cookie used by protected endpoints
+              schema:
+                type: string
+                example: PHPSESSID=example-session-id; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                success: true
+                data:
+                  ID: 3
+                  FirstName: Jane
+                  LastName: Doe
+                message: Login successful
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Credentials were rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Invalid username or password
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /LAMPAPI/AddContact.php:
+    post:
+      tags:
+        - Contacts
+      summary: Add a contact
+      operationId: addContact
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+            example:
+              FirstName: John
+              LastName: Smith
+              Phone: 407-555-1234
+              Email: john@example.com
+      responses:
+        '201':
+          description: Contact added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedContactResponse'
+              example:
+                success: true
+                data:
+                  ID: 12
+                message: Contact added successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/NotAuthenticated'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /LAMPAPI/SearchContact.php:
+    post:
+      tags:
+        - Contacts
+      summary: List or search contacts
+      description: |
+        Returns a paginated list of contacts owned by the authenticated user.
+        An empty query lists all contacts. The limit defaults to 10 and is
+        capped at 100.
+      operationId: searchContacts
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+            example:
+              query: Jo
+              page: 1
+              limit: 10
+      responses:
+        '200':
+          description: Contacts returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              example:
+                success: true
+                data:
+                  - ID: 12
+                    FirstName: John
+                    LastName: Smith
+                    Phone: 407-555-1234
+                    Email: john@example.com
+                    DateCreated: '2026-09-17 18:30:00'
+                pagination:
+                  page: 1
+                  limit: 10
+                  total: 1
+                  totalPages: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/NotAuthenticated'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /LAMPAPI/EditContact.php:
+    post:
+      tags:
+        - Contacts
+      summary: Edit a contact
+      description: Updates all editable fields for a contact owned by the authenticated user.
+      operationId: editContact
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditContactRequest'
+            example:
+              ID: 12
+              FirstName: Janet
+              LastName: Smith
+              Phone: 407-555-5678
+              Email: janet@example.com
+      responses:
+        '200':
+          description: Contact updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                data: null
+                message: Contact updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/NotAuthenticated'
+        '404':
+          $ref: '#/components/responses/ContactNotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /LAMPAPI/DeleteContact.php:
+    post:
+      tags:
+        - Contacts
+      summary: Delete a contact
+      operationId: deleteContact
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactIDRequest'
+            example:
+              ID: 12
+      responses:
+        '200':
+          description: Contact deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                data: null
+                message: Contact deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/NotAuthenticated'
+        '404':
+          $ref: '#/components/responses/ContactNotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: PHP session cookie returned after a successful login.
+
+  schemas:
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - FirstName
+        - LastName
+        - Username
+        - Password
+      properties:
+        FirstName:
+          type: string
+          minLength: 1
+        LastName:
+          type: string
+          minLength: 1
+        Username:
+          type: string
+          minLength: 1
+        Password:
+          type: string
+          format: password
+          minLength: 1
+
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - Username
+        - Password
+      properties:
+        Username:
+          type: string
+          minLength: 1
+        Password:
+          type: string
+          format: password
+          minLength: 1
+
+    ContactInput:
+      type: object
+      additionalProperties: false
+      required:
+        - FirstName
+        - LastName
+        - Phone
+        - Email
+      properties:
+        FirstName:
+          type: string
+          minLength: 1
+        LastName:
+          type: string
+          minLength: 1
+        Phone:
+          type: string
+          minLength: 1
+        Email:
+          type: string
+          format: email
+          minLength: 1
+
+    EditContactRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - ID
+        - FirstName
+        - LastName
+        - Phone
+        - Email
+      properties:
+        ID:
+          type: integer
+          minimum: 1
+        FirstName:
+          type: string
+          minLength: 1
+        LastName:
+          type: string
+          minLength: 1
+        Phone:
+          type: string
+          minLength: 1
+        Email:
+          type: string
+          format: email
+          minLength: 1
+
+    ContactIDRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - ID
+      properties:
+        ID:
+          type: integer
+          minimum: 1
+
+    SearchRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Case-insensitive partial match; use an empty string to list all contacts.
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+
+    Contact:
+      type: object
+      required:
+        - ID
+        - FirstName
+        - LastName
+        - Phone
+        - Email
+        - DateCreated
+      properties:
+        ID:
+          type: integer
+          minimum: 1
+        FirstName:
+          type: string
+        LastName:
+          type: string
+        Phone:
+          type: string
+        Email:
+          type: string
+          format: email
+        DateCreated:
+          type: string
+          description: MySQL timestamp for when the contact was created.
+          example: '2026-09-17 18:30:00'
+
+    IDData:
+      type: object
+      required:
+        - ID
+      properties:
+        ID:
+          type: integer
+          minimum: 1
+
+    UserData:
+      type: object
+      required:
+        - ID
+        - FirstName
+        - LastName
+      properties:
+        ID:
+          type: integer
+          minimum: 1
+        FirstName:
+          type: string
+        LastName:
+          type: string
+
+    Pagination:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    CreatedUserResponse:
+      type: object
+      required:
+        - success
+        - data
+        - message
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        data:
+          $ref: '#/components/schemas/IDData'
+        message:
+          type: string
+
+    CreatedContactResponse:
+      type: object
+      required:
+        - success
+        - data
+        - message
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        data:
+          $ref: '#/components/schemas/IDData'
+        message:
+          type: string
+
+    LoginResponse:
+      type: object
+      required:
+        - success
+        - data
+        - message
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        data:
+          $ref: '#/components/schemas/UserData'
+        message:
+          type: string
+
+    SearchResponse:
+      type: object
+      required:
+        - success
+        - data
+        - pagination
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    MessageResponse:
+      type: object
+      required:
+        - success
+        - data
+        - message
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        data:
+          type: object
+          nullable: true
+          example: null
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          enum:
+            - false
+        error:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Request JSON or one of its fields is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: 'Missing or invalid field: FirstName'
+
+    NotAuthenticated:
+      description: A valid authenticated session is required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Not logged in
+
+    ContactNotFound:
+      description: The contact does not exist or is not owned by the authenticated user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Contact not found
+
+    MethodNotAllowed:
+      description: Only POST is supported
+      headers:
+        Allow:
+          schema:
+            type: string
+            example: POST
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Method not allowed
+
+    UnsupportedMediaType:
+      description: Content-Type must be application/json
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Content-Type must be application/json
+
+    InternalServerError:
+      description: An unexpected server or database error occurred
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            serverError:
+              value:
+                success: false
+                error: Internal server error
+            databaseUnavailable:
+              value:
+                success: false
+                error: Database connection unavailable
