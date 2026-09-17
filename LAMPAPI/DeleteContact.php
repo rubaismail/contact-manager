@@ -1,61 +1,23 @@
 <?php
 
-require_once 'config.php';
-require_once 'api_utils.php';
+require_once __DIR__ . '/api_utils.php';
+require_once __DIR__ . '/config.php';
 
 $userID = requireAuth();
-
 $request = getRequestInfo();
+$contactID = getRequiredPositiveInt($request, 'ID');
 
-if (!isset($request['ID'])) {
-    sendError("Missing ID");
-    exit();
-}
-
-$contactID = $request['ID'];
-
-// Check if contact exists and belongs to the user
 $stmt = $conn->prepare(
-    "SELECT ID FROM Contacts WHERE ID = ? AND UserID = ?"
+    'DELETE FROM Contacts WHERE ID = ? AND UserID = ?'
 );
-if (!$stmt) {
-    sendError("Database error", 500);
-    exit();
-}
-
-$stmt->bind_param("ii", $contactID, $userID);
+$stmt->bind_param('ii', $contactID, $userID);
 $stmt->execute();
-$stmt->store_result();
+$deletedRows = $stmt->affected_rows;
+$stmt->close();
 
-if ($stmt->num_rows === 0) {
-    $stmt->close();
-    sendError("No results found", 404);
+if ($deletedRows === 0) {
+    sendError('Contact not found', 404);
     exit();
 }
 
-$stmt->close();
-
-// Delete the contact
-$stmt = $conn->prepare(
-    "DELETE FROM Contacts WHERE ID = ? AND UserID = ?"
-);
-
-if (!$stmt) {
-    sendError("Database error", 500);
-    exit();
-}
-
-$stmt->bind_param("ii", $contactID, $userID);
-
-if ($stmt->execute()) {
-    sendJson([
-        "success" => true,
-        "message" => "Contact deleted successfully"
-    ]);
-} else {
-    sendError("Failed to delete contact", 500);
-}
-
-$stmt->close();
-
-?>
+sendSuccess(null, 'Contact deleted successfully');
