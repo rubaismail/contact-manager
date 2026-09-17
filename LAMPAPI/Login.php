@@ -1,4 +1,3 @@
-?>
 <?php
 
 	require_once 'api_utils.php';
@@ -19,7 +18,7 @@
         exit();
     }
 
-    $username = $request['Username'];
+    $username = trim($request['Username']);
     $password = $request['Password'];
 
     if ($username === "" || $password === "") {
@@ -27,48 +26,42 @@
         exit();
     }
  	
-	$stmt = $conn->prepare("SELECT ID,firstName,lastName FROM Users WHERE Login=? AND Password =?");
+	$stmt = $conn->prepare("SELECT ID, firstName, lastName, Password FROM Users WHERE Username=?");
 
-    if(!$stmt) {
+   if(!$stmt) {
         sendError("Database error", 500);
         exit();
     }
-	$stmt->bind_param("ss", $request["login"], $request["password"]);
+	$stmt->bind_param("s", $username);
 	$stmt->execute();
 	$result = $stmt->get_result();
 
 	if( $row = $result->fetch_assoc()  )
 	{
-		returnWithInfo( $row['firstName'], $row['lastName'], $row['ID'] );
+		if (password_verify($password, $row['Password'])){
+
+			session_regenerate_id(true);
+
+			$_SESSION['valid'] = true;
+			$_SESSION['userId'] = (int) $row["ID"]
+
+			returnWithInfo( $row['firstName'], $row['lastName'], $row['ID'] );
+		} else {
+			// Invalid password
+			sendError("Invalid username or password", 401);
+		}
 	}
 	else
 	{
-		returnWithError("No Records Found");
+		sendError("Invalid username or password", 401);
 	}
 
 	$stmt->close();
 	
-	function getRequestInfo()
-	{
-		return json_decode(file_get_contents('php://input'), true);
-	}
-
-	function sendResultInfoAsJson( $obj )
-	{
-		header('Content-type: application/json');
-		echo $obj;
-	}
-	
-	function returnWithError( $err )
-	{
-		$retValue = '{"id":0,"firstName":"","lastName":"","error":"' . $err . '"}';
-		sendResultInfoAsJson( $retValue );
-	}
-	
 	function returnWithInfo( $firstName, $lastName, $id )
 	{
 		$retValue = '{"id":' . $id . ',"firstName":"' . $firstName . '","lastName":"' . $lastName . '","error":""}';
-		sendResultInfoAsJson( $retValue );
+		sendJson( $retValue );
 	}
 	
 ?>
