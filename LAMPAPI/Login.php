@@ -1,67 +1,56 @@
 <?php
 
-	require_once 'api_utils.php';
-	require_once 'config.php';
-	
-	$request = getRequestInfo();
-	
-	$id = 0;
-	$firstName = "";
-	$lastName = "";
+require_once __DIR__ . '/api_utils.php';
+require_once __DIR__ . '/config.php';
 
-    // Validate required fields
-    if (
-        !isset($request['Username']) ||
-        !isset($request['Password'])
-    ) {
-        sendError("One or more of the fields are missing");
-        exit();
-    }
+$request = getRequestInfo();
 
-    $username = trim($request['Username']);
-    $password = $request['Password'];
+if (
+    !isset($request['Username'], $request['Password']) ||
+    !is_string($request['Username']) ||
+    !is_string($request['Password'])
+) {
+    sendError("One or more of the fields are missing");
+    exit();
+}
 
-    if ($username === "" || $password === "") {
-        sendError("One or more of the fields are missing");
-        exit();
-    }
- 	
-	$stmt = $conn->prepare("SELECT ID, firstName, lastName, Password FROM Users WHERE Username=?");
+$username = trim($request['Username']);
+$password = $request['Password'];
 
-   if(!$stmt) {
-        sendError("Database error", 500);
-        exit();
-    }
-	$stmt->bind_param("s", $username);
-	$stmt->execute();
-	$result = $stmt->get_result();
+if ($username === "" || $password === "") {
+    sendError("One or more of the fields are missing");
+    exit();
+}
 
-	if( $row = $result->fetch_assoc()  )
-	{
-		if (password_verify($password, $row['Password'])){
+$stmt = $conn->prepare(
+    "SELECT ID, FirstName, LastName, Password
+     FROM Users
+     WHERE Username = ?"
+);
 
-			session_regenerate_id(true);
+if (!$stmt) {
+    sendError("Database error", 500);
+    exit();
+}
 
-			$_SESSION['valid'] = true;
-			$_SESSION['userId'] = (int) $row["ID"]
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$stmt->close();
 
-			returnWithInfo( $row['firstName'], $row['lastName'], $row['ID'] );
-		} else {
-			// Invalid password
-			sendError("Invalid username or password", 401);
-		}
-	}
-	else
-	{
-		sendError("Invalid username or password", 401);
-	}
+if (!$row || !password_verify($password, $row['Password'])) {
+    sendError("Invalid username or password", 401);
+    exit();
+}
 
-	$stmt->close();
-	
-	function returnWithInfo( $firstName, $lastName, $id )
-	{
-		$retValue = '{"id":' . $id . ',"firstName":"' . $firstName . '","lastName":"' . $lastName . '","error":""}';
-		sendJson( $retValue );
-	}
-	
-?>
+session_regenerate_id(true);
+$_SESSION['valid'] = true;
+$_SESSION['userId'] = (int) $row['ID'];
+
+sendJson([
+    "success" => true,
+    "ID" => (int) $row['ID'],
+    "FirstName" => $row['FirstName'],
+    "LastName" => $row['LastName']
+]);
