@@ -1,43 +1,27 @@
 <?php
 
-  require_once 'api_utils.php';
-	require_once 'config.php';
+require_once __DIR__ . '/api_utils.php';
+require_once __DIR__ . '/config.php';
 
-  $userID = requireAuth();
+$userID = requireAuth();
+$request = getRequestInfo();
 
-	$request = getRequestInfo();
-	
-    if ( !isset($request['FirstName']) || !isset($request['LastName']) || !isset($request['Phone']) || !isset($request['Email'])){
-        sendError("One or more of the fields are missing");
-        exit();
-    }
+$firstName = getRequiredString($request, 'FirstName');
+$lastName = getRequiredString($request, 'LastName');
+$phone = getRequiredString($request, 'Phone');
+$email = getRequiredString($request, 'Email');
 
-	$firstName = trim($request["FirstName"]);
-    $lastName = trim($request["LastName"]);
-    $phone = trim($request["Phone"]);
-    $email = trim($request["Email"]);
+$stmt = $conn->prepare(
+    'INSERT INTO Contacts (UserID, FirstName, LastName, Phone, Email)
+     VALUES (?, ?, ?, ?, ?)'
+);
+$stmt->bind_param('issss', $userID, $firstName, $lastName, $phone, $email);
+$stmt->execute();
+$contactID = (int) $stmt->insert_id;
+$stmt->close();
 
-    if ($firstName === "" || $lastName === "" || $phone === "" || $email === "") {
-        sendError("One or more of the fields are missing");
-        exit();
-    }
-
-	$stmt = $conn->prepare("INSERT into Contacts (UserID, FirstName, LastName, Phone, Email) VALUES(?,?,?,?,?)");
-    if(!$stmt) {
-        sendError("Database error", 500);
-        exit();
-    }
-
-	$stmt->bind_param("issss", $userID, $firstName, $lastName, $phone, $email);
-
-	if ($stmt->execute()) {
-        sendJson([
-            "success" => true,
-            "message" => "Contact added successfully",
-            "ID"      => $stmt->insert_id
-        ]);
-    }else{
-        sendError("Failed to add contact", 500);
-    }
-	$stmt->close();
-?>
+sendSuccess(
+    ['ID' => $contactID],
+    'Contact added successfully',
+    201
+);
