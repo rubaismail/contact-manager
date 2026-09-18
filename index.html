@@ -24,12 +24,10 @@
 
                 <label for="login-username">Username</label>
                 <input type="text" id="login-username">
-
                 <p class="error" id="login-username-error" aria-live="polite"></p>
 
                 <label for="login-password">Password</label>
                 <input type="password" id="login-password">
-
                 <p class="error" id="login-password-error" aria-live="polite"></p>
 
                 <button type="submit" class="submit-button">
@@ -37,31 +35,27 @@
                 </button>
 
             </form>
+
             <form id="register-form" class="hidden">
 
                 <label for="first-name">First Name</label>
                 <input type="text" id="first-name">
-
                 <p class="error" id="first-name-error" aria-live="polite"></p>
 
                 <label for="last-name">Last Name</label>
                 <input type="text" id="last-name">
-
                 <p class="error" id="last-name-error" aria-live="polite"></p>
 
                 <label for="register-username">Username</label>
                 <input type="text" id="register-username">
-
                 <p class="error" id="register-username-error" aria-live="polite"></p>
 
                 <label for="register-password">Password</label>
                 <input type="password" id="register-password">
-
                 <p class="error" id="register-password-error" aria-live="polite"></p>
 
                 <label for="confirm-password">Confirm Password</label>
                 <input type="password" id="confirm-password">
-
                 <p class="error" id="confirm-password-error" aria-live="polite"></p>
 
                 <button type="submit" class="submit-button">
@@ -69,9 +63,37 @@
                 </button>
             </form>
         </div>
+
+        <div class="contact-card" id="add-contact-section">
+            <h2>Add Contact</h2>
+            <form id="add-contact-form">
+
+                <label for="contact-first-name">First Name</label>
+                <input type="text" id="contact-first-name">
+                <p class="error" id="contact-first-name-error" aria-live="polite"></p>
+
+                <label for="contact-last-name">Last Name</label>
+                <input type="text" id="contact-last-name">
+                <p class="error" id="contact-last-name-error" aria-live="polite"></p>
+
+                <label for="contact-email">Email</label>
+                <input type="email" id="contact-email">
+                <p class="error" id="contact-email-error" aria-live="polite"></p>
+
+                <label for="contact-phone">Phone</label>
+                <input type="tel" id="contact-phone">
+                <p class="error" id="contact-phone-error" aria-live="polite"></p>
+
+                <button type="submit" class="submit-button">
+                    Add Contact
+                </button>
+
+            </form>
+        </div>
     </div>
 
     <script src="js/auth.js"></script>
+    <script src="js/contacts.js"></script>
 
 </body>
 </html>

@@ -100,6 +100,20 @@ input:focus {
     margin-bottom: 0.8rem;
 }
 
+.contact-card {
+    background-color: white;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-align: left;
+    margin-top: 1.5rem;
+}
+
+.contact-card h2 {
+    color: #2563eb;
+    margin-bottom: 1.5rem;
+}
+
 .hidden {
     display: none;
 }
