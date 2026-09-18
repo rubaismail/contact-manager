@@ -100,6 +100,12 @@ input:focus {
     margin-bottom: 0.8rem;
 }
 
+.success {
+    color: #15803d;
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+}
+
 .contact-card {
     background-color: white;
     padding: 2rem;
@@ -116,4 +122,15 @@ input:focus {
 
 .hidden {
     display: none;
+}
+
+.message {
+    min-height: 18px;
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+}
+
+.submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

@@ -10,14 +10,20 @@
 
 <body>
     <div class="container">
+
         <h1>Contact Manager</h1>
         <p>Manage your contacts in one place.</p>
 
         <div class="auth-card">
 
             <div class="tabs">
-                <button id="login-tab" class="active">Login</button>
-                <button id="register-tab">Register</button>
+                <button type="button" id="login-tab" class="active">
+                    Login
+                </button>
+
+                <button type="button" id="register-tab">
+                    Register
+                </button>
             </div>
 
             <form id="login-form">
@@ -29,6 +35,8 @@
                 <label for="login-password">Password</label>
                 <input type="password" id="login-password">
                 <p class="error" id="login-password-error" aria-live="polite"></p>
+
+                <p class="message" id="login-message" aria-live="polite"></p>
 
                 <button type="submit" class="submit-button">
                     Log In
@@ -58,42 +66,17 @@
                 <input type="password" id="confirm-password">
                 <p class="error" id="confirm-password-error" aria-live="polite"></p>
 
+                <p class="message" id="register-message" aria-live="polite"></p>
+
                 <button type="submit" class="submit-button">
                     Create Account
-                </button>
-            </form>
-        </div>
-
-        <div class="contact-card" id="add-contact-section">
-            <h2>Add Contact</h2>
-            <form id="add-contact-form">
-
-                <label for="contact-first-name">First Name</label>
-                <input type="text" id="contact-first-name">
-                <p class="error" id="contact-first-name-error" aria-live="polite"></p>
-
-                <label for="contact-last-name">Last Name</label>
-                <input type="text" id="contact-last-name">
-                <p class="error" id="contact-last-name-error" aria-live="polite"></p>
-
-                <label for="contact-email">Email</label>
-                <input type="email" id="contact-email">
-                <p class="error" id="contact-email-error" aria-live="polite"></p>
-
-                <label for="contact-phone">Phone</label>
-                <input type="tel" id="contact-phone">
-                <p class="error" id="contact-phone-error" aria-live="polite"></p>
-
-                <button type="submit" class="submit-button">
-                    Add Contact
                 </button>
 
             </form>
         </div>
     </div>
-
     <script src="js/auth.js"></script>
-    <script src="js/contacts.js"></script>
 
 </body>
+
 </html>

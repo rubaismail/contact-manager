@@ -4,6 +4,22 @@ const registerTab = document.getElementById("register-tab");
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
 
+const loginMessage = document.getElementById("login-message");
+const registerMessage = document.getElementById("register-message");
+
+
+function showMessage(element, message, success) {
+    element.textContent = message;
+
+    element.classList.remove("success", "error");
+
+    if (success) {
+        element.classList.add("success");
+    } else {
+        element.classList.add("error");
+    }
+}
+
 
 loginTab.addEventListener("click", function () {
     loginForm.classList.remove("hidden");
@@ -11,7 +27,11 @@ loginTab.addEventListener("click", function () {
 
     loginTab.classList.add("active");
     registerTab.classList.remove("active");
+
+    loginMessage.textContent = "";
+    registerMessage.textContent = "";
 });
+
 
 registerTab.addEventListener("click", function () {
     registerForm.classList.remove("hidden");
@@ -19,9 +39,13 @@ registerTab.addEventListener("click", function () {
 
     registerTab.classList.add("active");
     loginTab.classList.remove("active");
+
+    loginMessage.textContent = "";
+    registerMessage.textContent = "";
 });
 
-loginForm.addEventListener("submit", function (event) {
+
+loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const username = document.getElementById("login-username");
@@ -32,6 +56,7 @@ loginForm.addEventListener("submit", function (event) {
 
     usernameError.textContent = "";
     passwordError.textContent = "";
+    loginMessage.textContent = "";
 
     let valid = true;
 
@@ -45,12 +70,46 @@ loginForm.addEventListener("submit", function (event) {
         valid = false;
     }
 
-    if (valid) {
-        console.log("Login form is valid.");
+    if (!valid) {
+        return;
+    }
+
+    try {
+        const response = await fetch("LAMPAPI/Login.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({
+                Username: username.value.trim(),
+                Password: password.value
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.href = "contacts.html";
+        } else {
+            showMessage(
+                loginMessage,
+                data.error || "Unable to log in. Please try again.",
+                false
+            );
+        }
+
+    } catch (error) {
+        showMessage(
+            loginMessage,
+            "Unable to connect to the server.",
+            false
+        );
     }
 });
 
-registerForm.addEventListener("submit", function (event) {
+
+registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const firstName = document.getElementById("first-name");
@@ -70,6 +129,7 @@ registerForm.addEventListener("submit", function (event) {
     usernameError.textContent = "";
     passwordError.textContent = "";
     confirmPasswordError.textContent = "";
+    registerMessage.textContent = "";
 
     let valid = true;
 
@@ -101,7 +161,54 @@ registerForm.addEventListener("submit", function (event) {
         valid = false;
     }
 
-    if (valid) {
-        console.log("Registration form is valid.");
+    if (!valid) {
+        return;
+    }
+
+    try {
+        const response = await fetch("LAMPAPI/Register.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                FirstName: firstName.value.trim(),
+                LastName: lastName.value.trim(),
+                Username: username.value.trim(),
+                Password: password.value
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            registerForm.reset();
+
+            registerForm.classList.add("hidden");
+            loginForm.classList.remove("hidden");
+
+            registerTab.classList.remove("active");
+            loginTab.classList.add("active");
+
+            showMessage(
+                loginMessage,
+                "Account created successfully. You can now log in.",
+                true
+            );
+
+        } else {
+            showMessage(
+                registerMessage,
+                data.error || "Unable to create account. Please try again.",
+                false
+            );
+        }
+
+    } catch (error) {
+        showMessage(
+            registerMessage,
+            "Unable to connect to the server.",
+            false
+        );
     }
 });
