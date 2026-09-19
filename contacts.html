@@ -46,7 +46,7 @@
         </section>
 
         <p class="feature-note">
-            Adding, editing, and deleting contacts will be enabled in their upcoming workflows.
+            Adding and deleting contacts will be enabled in their upcoming workflows.
         </p>
 
         <p id="dashboard-message" class="message" aria-live="polite"></p>
@@ -64,6 +64,45 @@
             </button>
         </nav>
     </main>
+
+    <dialog id="edit-contact-dialog" class="contact-dialog" aria-labelledby="edit-contact-title">
+        <form id="edit-contact-form" class="contact-form">
+            <div class="dialog-header">
+                <h2 id="edit-contact-title">Edit Contact</h2>
+                <button
+                    id="close-edit-dialog"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close edit contact form"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <label for="edit-first-name">First Name</label>
+            <input id="edit-first-name" type="text" maxlength="50" required>
+
+            <label for="edit-last-name">Last Name</label>
+            <input id="edit-last-name" type="text" maxlength="50" required>
+
+            <label for="edit-phone">Phone</label>
+            <input id="edit-phone" type="tel" maxlength="50" required>
+
+            <label for="edit-email">Email</label>
+            <input id="edit-email" type="email" maxlength="100" required>
+
+            <p id="edit-contact-message" class="message" role="status" aria-live="polite"></p>
+
+            <div class="dialog-actions">
+                <button id="cancel-edit" class="secondary-button" type="button">
+                    Cancel
+                </button>
+                <button id="save-edit" class="primary-button" type="submit">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </dialog>
 
     <script src="js/dashboard.js"></script>
     <script src="js/logout.js"></script>

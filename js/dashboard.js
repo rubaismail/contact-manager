@@ -8,6 +8,16 @@ const pagination = document.getElementById("pagination");
 const previousPageButton = document.getElementById("previous-page");
 const nextPageButton = document.getElementById("next-page");
 const pageSummary = document.getElementById("page-summary");
+const editContactDialog = document.getElementById("edit-contact-dialog");
+const editContactForm = document.getElementById("edit-contact-form");
+const editFirstName = document.getElementById("edit-first-name");
+const editLastName = document.getElementById("edit-last-name");
+const editPhone = document.getElementById("edit-phone");
+const editEmail = document.getElementById("edit-email");
+const editContactMessage = document.getElementById("edit-contact-message");
+const closeEditDialogButton = document.getElementById("close-edit-dialog");
+const cancelEditButton = document.getElementById("cancel-edit");
+const saveEditButton = document.getElementById("save-edit");
 
 const dashboardState = {
     page: 1,
@@ -17,6 +27,7 @@ const dashboardState = {
 };
 
 let activeRequest = null;
+let contactBeingEdited = null;
 
 function setContactStatus(message, type = "") {
     contactStatus.textContent = message;
@@ -60,6 +71,30 @@ function formatCreatedDate(value) {
     });
 }
 
+function setEditMessage(message, type = "") {
+    editContactMessage.textContent = message;
+    editContactMessage.classList.remove("error", "success");
+
+    if (type) {
+        editContactMessage.classList.add(type);
+    }
+}
+
+function openEditDialog(contact) {
+    contactBeingEdited = contact;
+    editFirstName.value = contact.FirstName || "";
+    editLastName.value = contact.LastName || "";
+    editPhone.value = contact.Phone || "";
+    editEmail.value = contact.Email || "";
+    setEditMessage("");
+    editContactDialog.showModal();
+    editFirstName.focus();
+}
+
+function closeEditDialog() {
+    editContactDialog.close();
+}
+
 function createContactCard(contact) {
     const listItem = document.createElement("li");
     const card = document.createElement("article");
@@ -84,9 +119,11 @@ function createContactCard(contact) {
     editButton.className = "secondary-button";
     editButton.type = "button";
     editButton.textContent = "Edit";
-    editButton.disabled = true;
     editButton.dataset.contactId = contact.ID;
     editButton.setAttribute("aria-label", `Edit ${fullName || "contact"}`);
+    editButton.addEventListener("click", function () {
+        openEditDialog(contact);
+    });
 
     deleteButton.className = "danger-button";
     deleteButton.type = "button";
@@ -194,9 +231,10 @@ async function loadContacts(page = 1, query = dashboardState.query) {
 
         renderContacts(data.data);
         updatePagination(data.pagination);
+        return true;
     } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
-            return;
+            return false;
         }
 
         const message = error instanceof Error
@@ -204,6 +242,7 @@ async function loadContacts(page = 1, query = dashboardState.query) {
             : "Unable to load contacts.";
 
         setContactStatus(message, "error");
+        return false;
     } finally {
         if (activeRequest === requestController) {
             activeRequest = null;
@@ -214,12 +253,116 @@ async function loadContacts(page = 1, query = dashboardState.query) {
     }
 }
 
+editContactForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (!contactBeingEdited) {
+        setEditMessage("Unable to identify this contact. Please close the form and try again.", "error");
+        return;
+    }
+
+    const updatedContact = {
+        ID: Number(contactBeingEdited.ID),
+        FirstName: editFirstName.value.trim(),
+        LastName: editLastName.value.trim(),
+        Phone: editPhone.value.trim(),
+        Email: editEmail.value.trim()
+    };
+
+    if (!updatedContact.FirstName || !updatedContact.LastName ||
+        !updatedContact.Phone || !updatedContact.Email) {
+        setEditMessage("Please complete every field.", "error");
+        return;
+    }
+
+    setEditMessage("Saving changes...");
+    saveEditButton.disabled = true;
+    cancelEditButton.disabled = true;
+    closeEditDialogButton.disabled = true;
+
+    try {
+        const response = await fetch("LAMPAPI/EditContact.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(updatedContact)
+        });
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new Error("Unable to save this contact. Please try again.");
+        }
+
+        if (response.status === 401) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || "Unable to save this contact.");
+        }
+
+        closeEditDialog();
+
+        const contactsReloaded = await loadContacts(
+            dashboardState.page,
+            dashboardState.query
+        );
+
+        if (contactsReloaded) {
+            setContactStatus(data.message || "Contact updated successfully.", "success");
+        }
+    } catch (error) {
+        const message = error instanceof Error
+            ? error.message
+            : "Unable to save this contact.";
+
+        setEditMessage(message, "error");
+    } finally {
+        saveEditButton.disabled = false;
+        cancelEditButton.disabled = false;
+        closeEditDialogButton.disabled = false;
+    }
+});
+
+closeEditDialogButton.addEventListener("click", closeEditDialog);
+cancelEditButton.addEventListener("click", closeEditDialog);
+
+editContactDialog.addEventListener("click", function (event) {
+    if (event.target === editContactDialog) {
+        closeEditDialog();
+    }
+});
+
+editContactDialog.addEventListener("close", function () {
+    contactBeingEdited = null;
+    editContactForm.reset();
+    setEditMessage("");
+});
+
 searchForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
     const query = searchInput.value.trim();
     clearSearchButton.classList.toggle("hidden", query === "");
     loadContacts(1, query);
+});
+
+searchInput.addEventListener("input", function () {
+    if (searchInput.value.trim() !== "") {
+        return;
+    }
+
+    clearSearchButton.classList.add("hidden");
+
+    if (dashboardState.query !== "") {
+        loadContacts(1, "");
+    }
 });
 
 clearSearchButton.addEventListener("click", function () {
