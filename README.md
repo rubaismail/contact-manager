@@ -101,6 +101,7 @@ All endpoints accept JSON requests and return JSON responses.
 | --- | --- | --- | --- |
 | `POST` | `/LAMPAPI/Register.php` | Create an account | Public |
 | `POST` | `/LAMPAPI/Login.php` | Authenticate a user | Public |
+| `POST` | `/LAMPAPI/Logout.php` | End the current session | Required |
 | `POST` | `/LAMPAPI/AddContact.php` | Create a contact | Required |
 | `POST` | `/LAMPAPI/SearchContact.php` | List or search contacts | Required |
 | `POST` | `/LAMPAPI/EditContact.php` | Update a contact | Required |

@@ -122,6 +122,42 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /LAMPAPI/Logout.php:
+    post:
+      tags:
+        - Authentication
+      summary: Log out the current user
+      description: Ends the current PHP session. The request body must be an empty JSON object.
+      operationId: logoutUser
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmptyObject'
+            example: {}
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                data: null
+                message: Logout successful
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /LAMPAPI/AddContact.php:
     post:
       tags:
@@ -349,6 +385,11 @@ components:
           type: string
           format: password
           minLength: 1
+
+    EmptyObject:
+      type: object
+      additionalProperties: false
+      maxProperties: 0
 
     ContactInput:
       type: object
