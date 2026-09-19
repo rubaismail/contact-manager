@@ -7,6 +7,8 @@ const registerForm = document.getElementById("register-form");
 const loginMessage = document.getElementById("login-message");
 const registerMessage = document.getElementById("register-message");
 
+const loginButton = document.getElementById("login-button");
+const registerButton = document.getElementById("register-button");
 
 function showMessage(element, message, success) {
     element.textContent = message;
@@ -74,6 +76,9 @@ loginForm.addEventListener("submit", async function (event) {
         return;
     }
 
+    loginButton.disabled = true;
+    loginButton.textContent = "Logging in...";
+
     try {
         const response = await fetch("LAMPAPI/Login.php", {
             method: "POST",
@@ -105,6 +110,9 @@ loginForm.addEventListener("submit", async function (event) {
             "Unable to connect to the server.",
             false
         );
+    } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Log In";
     }
 });
 
@@ -165,6 +173,9 @@ registerForm.addEventListener("submit", async function (event) {
         return;
     }
 
+    registerButton.disabled = true;
+    registerButton.textContent = "Creating account...";
+
     try {
         const response = await fetch("LAMPAPI/Register.php", {
             method: "POST",
@@ -210,5 +221,8 @@ registerForm.addEventListener("submit", async function (event) {
             "Unable to connect to the server.",
             false
         );
+    } finally {
+        registerButton.disabled = false;
+        registerButton.textContent = "Create Account";
     }
 });
