@@ -1,5 +1,3 @@
-// temporary dashboard
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,16 +11,64 @@
 <body>
 
     <div class="container">
-        <h1>Contacts</h1>
-        <p>Manage your contacts below.</p>
 
-        <p id="dashboard-message" class="message" aria-live="polite"></p>
+        <h1>Contacts</h1>
 
         <button id="logout-button" class="submit-button">
             Log Out
         </button>
+
+        <p id="dashboard-message" class="message" aria-live="polite"></p>
+
+
+        <!-- Add Contact -->
+
+        <div class="contact-card">
+
+            <h2>Add Contact</h2>
+
+            <form id="add-contact-form">
+
+                <label for="contact-first-name">First Name</label>
+                <input type="text" id="contact-first-name">
+                <p class="error" id="contact-first-name-error" aria-live="polite"></p>
+
+
+                <label for="contact-last-name">Last Name</label>
+                <input type="text" id="contact-last-name">
+                <p class="error" id="contact-last-name-error" aria-live="polite"></p>
+
+
+                <label for="contact-email">Email</label>
+                <input type="email" id="contact-email">
+                <p class="error" id="contact-email-error" aria-live="polite"></p>
+
+
+                <label for="contact-phone">Phone</label>
+                <input type="tel" id="contact-phone">
+                <p class="error" id="contact-phone-error" aria-live="polite"></p>
+
+
+                <p id="contact-message" class="message" aria-live="polite"></p>
+
+
+                <button type="submit" class="submit-button" id="add-contact-button">
+                    Add Contact
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- Contact dashboard/list can be built here -->
+
+        <div id="contacts-list"></div>
+
     </div>
 
+
+    <script src="js/contacts.js"></script>
     <script src="js/logout.js"></script>
 
 </body>
