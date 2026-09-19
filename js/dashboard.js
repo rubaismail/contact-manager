@@ -50,6 +50,8 @@ let contactBeingEdited = null;
 let contactBeingDeleted = null;
 let deleteInProgress = false;
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function setContactStatus(message, type = "") {
     contactStatus.textContent = message;
     contactStatus.classList.remove("error", "success");
@@ -300,36 +302,11 @@ async function loadContacts(page = 1, query = dashboardState.query) {
     clearSearchButton.disabled = true;
 
     try {
-        const response = await fetch("LAMPAPI/SearchContact.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "same-origin",
-            signal: requestController.signal,
-            body: JSON.stringify({
-                query: normalizeSearchQuery(query),
-                page: page,
-                limit: dashboardState.limit
-            })
-        });
-
-        let data;
-
-        try {
-            data = await response.json();
-        } catch (error) {
-            throw new Error("Unable to load contacts. Please try again.");
-        }
-
-        if (response.status === 401) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || "Unable to load contacts.");
-        }
+        const data = await apiPost("LAMPAPI/SearchContact.php", {
+            query: normalizeSearchQuery(query),
+            page: page,
+            limit: dashboardState.limit
+        }, { signal: requestController.signal });
 
         if (!Array.isArray(data.data) || !data.pagination) {
             throw new Error("The server returned an unexpected response.");
@@ -339,6 +316,10 @@ async function loadContacts(page = 1, query = dashboardState.query) {
         updatePagination(data.pagination);
         return true;
     } catch (error) {
+        if (error instanceof ApiAuthError) {
+            return false;
+        }
+
         if (error instanceof DOMException && error.name === "AbortError") {
             return false;
         }
@@ -368,11 +349,21 @@ addContactForm.addEventListener("submit", async function (event) {
         Phone: addPhone.value.trim(),
         Email: addEmail.value.trim()
     };
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!newContact.FirstName || !newContact.LastName ||
         !newContact.Phone || !newContact.Email) {
         setAddMessage("Please complete every field.", "error");
+
+        if (!newContact.FirstName) {
+            addFirstName.focus();
+        } else if (!newContact.LastName) {
+            addLastName.focus();
+        } else if (!newContact.Phone) {
+            addPhone.focus();
+        } else {
+            addEmail.focus();
+        }
+
         return;
     }
 
@@ -399,31 +390,7 @@ addContactForm.addEventListener("submit", async function (event) {
     closeAddDialogButton.disabled = true;
 
     try {
-        const response = await fetch("LAMPAPI/AddContact.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "same-origin",
-            body: JSON.stringify(newContact)
-        });
-
-        let data;
-
-        try {
-            data = await response.json();
-        } catch (error) {
-            throw new Error("Unable to add this contact. Please try again.");
-        }
-
-        if (response.status === 401) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || "Unable to add this contact.");
-        }
+        const data = await apiPost("LAMPAPI/AddContact.php", newContact);
 
         addInProgress = false;
         closeAddDialog();
@@ -434,6 +401,10 @@ addContactForm.addEventListener("submit", async function (event) {
             setContactStatus(data.message || "Contact added successfully.", "success");
         }
     } catch (error) {
+        if (error instanceof ApiAuthError) {
+            return;
+        }
+
         const message = error instanceof Error
             ? error.message
             : "Unable to add this contact.";
@@ -487,6 +458,23 @@ editContactForm.addEventListener("submit", async function (event) {
     if (!updatedContact.FirstName || !updatedContact.LastName ||
         !updatedContact.Phone || !updatedContact.Email) {
         setEditMessage("Please complete every field.", "error");
+
+        if (!updatedContact.FirstName) {
+            editFirstName.focus();
+        } else if (!updatedContact.LastName) {
+            editLastName.focus();
+        } else if (!updatedContact.Phone) {
+            editPhone.focus();
+        } else {
+            editEmail.focus();
+        }
+
+        return;
+    }
+
+    if (!emailPattern.test(updatedContact.Email)) {
+        setEditMessage("Enter a valid email address.", "error");
+        editEmail.focus();
         return;
     }
 
@@ -506,31 +494,7 @@ editContactForm.addEventListener("submit", async function (event) {
     closeEditDialogButton.disabled = true;
 
     try {
-        const response = await fetch("LAMPAPI/EditContact.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "same-origin",
-            body: JSON.stringify(updatedContact)
-        });
-
-        let data;
-
-        try {
-            data = await response.json();
-        } catch (error) {
-            throw new Error("Unable to save this contact. Please try again.");
-        }
-
-        if (response.status === 401) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || "Unable to save this contact.");
-        }
+        const data = await apiPost("LAMPAPI/EditContact.php", updatedContact);
 
         closeEditDialog();
 
@@ -543,6 +507,10 @@ editContactForm.addEventListener("submit", async function (event) {
             setContactStatus(data.message || "Contact updated successfully.", "success");
         }
     } catch (error) {
+        if (error instanceof ApiAuthError) {
+            return;
+        }
+
         const message = error instanceof Error
             ? error.message
             : "Unable to save this contact.";
@@ -591,33 +559,7 @@ deleteContactForm.addEventListener("submit", async function (event) {
     closeDeleteDialogButton.disabled = true;
 
     try {
-        const response = await fetch("LAMPAPI/DeleteContact.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "same-origin",
-            body: JSON.stringify({
-                ID: contactID
-            })
-        });
-
-        let data;
-
-        try {
-            data = await response.json();
-        } catch (error) {
-            throw new Error("Unable to delete this contact. Please try again.");
-        }
-
-        if (response.status === 401) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || "Unable to delete this contact.");
-        }
+        const data = await apiPost("LAMPAPI/DeleteContact.php", { ID: contactID });
 
         deleteInProgress = false;
         closeDeleteDialog();
@@ -634,6 +576,10 @@ deleteContactForm.addEventListener("submit", async function (event) {
             );
         }
     } catch (error) {
+        if (error instanceof ApiAuthError) {
+            return;
+        }
+
         const message = error instanceof Error
             ? error.message
             : "Unable to delete this contact.";
