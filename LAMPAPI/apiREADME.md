@@ -48,7 +48,7 @@ Common status codes:
 
 ## Authentication
 
-`Login.php` creates a PHP session after verifying the submitted password. Clients must retain and resend the resulting `PHPSESSID` cookie when calling protected endpoints.
+`Login.php` creates a PHP session after verifying the submitted password. Clients must retain and resend the resulting `PHPSESSID` cookie when calling protected endpoints. `Logout.php` ends the current PHP session.
 
 ## Endpoints
 
@@ -79,6 +79,24 @@ Authenticates a user and creates a session.
 ```
 
 Returns the user ID and name in `data`.
+
+### Logout.php
+
+Ends the current PHP session. Send the `PHPSESSID` cookie obtained from login and an empty JSON object:
+
+```json
+{}
+```
+
+Returns HTTP `200` with:
+
+```json
+{
+  "success": true,
+  "data": null,
+  "message": "Logout successful"
+}
+```
 
 ### AddContact.php
 
