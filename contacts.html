@@ -1,5 +1,3 @@
-// temporary dashboard
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,21 +8,63 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="dashboard-page">
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <div>
+                <h1>Contacts</h1>
+                <p>Manage your contacts below.</p>
+            </div>
 
-    <div class="container">
-        <h1>Contacts</h1>
-        <p>Manage your contacts below.</p>
+            <button id="logout-button" class="secondary-button" type="button">
+                Log Out
+            </button>
+        </header>
+
+        <section class="dashboard-toolbar" aria-label="Contact controls">
+            <form id="search-form" class="search-form" role="search">
+                <label class="visually-hidden" for="contact-search">
+                    Search contacts
+                </label>
+                <input
+                    id="contact-search"
+                    type="search"
+                    placeholder="Search contacts"
+                    autocomplete="off"
+                    disabled
+                >
+                <button class="secondary-button" type="submit" disabled>
+                    Search
+                </button>
+            </form>
+
+            <button id="add-contact-button" class="primary-button" type="button" disabled>
+                Add Contact
+            </button>
+        </section>
+
+        <p class="feature-note">
+            Search and contact changes will be enabled in their upcoming workflows.
+        </p>
 
         <p id="dashboard-message" class="message" aria-live="polite"></p>
+        <p id="contact-status" class="dashboard-status" role="status" aria-live="polite"></p>
 
-        <button id="logout-button" class="submit-button">
-            Log Out
-        </button>
-    </div>
+        <ul id="contact-list" class="contact-list" aria-label="Your contacts"></ul>
 
+        <nav id="pagination" class="pagination hidden" aria-label="Contact pages">
+            <button id="previous-page" class="secondary-button" type="button">
+                Previous
+            </button>
+            <span id="page-summary" aria-live="polite"></span>
+            <button id="next-page" class="secondary-button" type="button">
+                Next
+            </button>
+        </nav>
+    </main>
+
+    <script src="js/dashboard.js"></script>
     <script src="js/logout.js"></script>
-
 </body>
 
 </html>
