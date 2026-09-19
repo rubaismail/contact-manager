@@ -1,5 +1,9 @@
 const contactList = document.getElementById("contact-list");
 const contactStatus = document.getElementById("contact-status");
+const searchForm = document.getElementById("search-form");
+const searchInput = document.getElementById("contact-search");
+const searchButton = document.getElementById("search-button");
+const clearSearchButton = document.getElementById("clear-search");
 const pagination = document.getElementById("pagination");
 const previousPageButton = document.getElementById("previous-page");
 const nextPageButton = document.getElementById("next-page");
@@ -8,8 +12,11 @@ const pageSummary = document.getElementById("page-summary");
 const dashboardState = {
     page: 1,
     limit: 10,
-    totalPages: 0
+    totalPages: 0,
+    query: ""
 };
+
+let activeRequest = null;
 
 function setContactStatus(message, type = "") {
     contactStatus.textContent = message;
@@ -99,7 +106,12 @@ function renderContacts(contacts) {
     contactList.replaceChildren();
 
     if (contacts.length === 0) {
-        setContactStatus("You do not have any contacts yet.");
+        if (dashboardState.query) {
+            setContactStatus(`No contacts found for "${dashboardState.query}".`);
+        } else {
+            setContactStatus("You do not have any contacts yet.");
+        }
+
         return;
     }
 
@@ -128,10 +140,21 @@ function updatePagination(paginationData) {
     pageSummary.textContent = `Page ${paginationData.page} of ${paginationData.totalPages}`;
 }
 
-async function loadContacts(page = 1) {
-    setContactStatus("Loading contacts...");
+async function loadContacts(page = 1, query = dashboardState.query) {
+    if (activeRequest) {
+        activeRequest.abort();
+    }
+
+    const requestController = new AbortController();
+    activeRequest = requestController;
+    dashboardState.query = query;
+
+    setContactStatus(query ? "Searching contacts..." : "Loading contacts...");
     contactList.replaceChildren();
+    contactList.setAttribute("aria-busy", "true");
     pagination.classList.add("hidden");
+    searchButton.disabled = true;
+    clearSearchButton.disabled = true;
 
     try {
         const response = await fetch("LAMPAPI/SearchContact.php", {
@@ -140,8 +163,9 @@ async function loadContacts(page = 1) {
                 "Content-Type": "application/json"
             },
             credentials: "same-origin",
+            signal: requestController.signal,
             body: JSON.stringify({
-                query: "",
+                query: query,
                 page: page,
                 limit: dashboardState.limit
             })
@@ -171,23 +195,49 @@ async function loadContacts(page = 1) {
         renderContacts(data.data);
         updatePagination(data.pagination);
     } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+            return;
+        }
+
         const message = error instanceof Error
             ? error.message
             : "Unable to load contacts.";
 
         setContactStatus(message, "error");
+    } finally {
+        if (activeRequest === requestController) {
+            activeRequest = null;
+            contactList.setAttribute("aria-busy", "false");
+            searchButton.disabled = false;
+            clearSearchButton.disabled = false;
+        }
     }
 }
 
+searchForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const query = searchInput.value.trim();
+    clearSearchButton.classList.toggle("hidden", query === "");
+    loadContacts(1, query);
+});
+
+clearSearchButton.addEventListener("click", function () {
+    searchInput.value = "";
+    clearSearchButton.classList.add("hidden");
+    searchInput.focus();
+    loadContacts(1, "");
+});
+
 previousPageButton.addEventListener("click", function () {
     if (dashboardState.page > 1) {
-        loadContacts(dashboardState.page - 1);
+        loadContacts(dashboardState.page - 1, dashboardState.query);
     }
 });
 
 nextPageButton.addEventListener("click", function () {
     if (dashboardState.page < dashboardState.totalPages) {
-        loadContacts(dashboardState.page + 1);
+        loadContacts(dashboardState.page + 1, dashboardState.query);
     }
 });
 

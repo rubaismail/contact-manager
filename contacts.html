@@ -29,12 +29,14 @@
                 <input
                     id="contact-search"
                     type="search"
-                    placeholder="Search contacts"
+                    placeholder="Search by name, email, or phone"
                     autocomplete="off"
-                    disabled
                 >
-                <button class="secondary-button" type="submit" disabled>
+                <button id="search-button" class="secondary-button" type="submit">
                     Search
+                </button>
+                <button id="clear-search" class="secondary-button hidden" type="button">
+                    Clear
                 </button>
             </form>
 
@@ -44,7 +46,7 @@
         </section>
 
         <p class="feature-note">
-            Search and contact changes will be enabled in their upcoming workflows.
+            Adding, editing, and deleting contacts will be enabled in their upcoming workflows.
         </p>
 
         <p id="dashboard-message" class="message" aria-live="polite"></p>
