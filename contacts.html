@@ -46,7 +46,7 @@
         </section>
 
         <p class="feature-note">
-            Adding and deleting contacts will be enabled in their upcoming workflows.
+            Adding contacts will be enabled in an upcoming workflow.
         </p>
 
         <p id="dashboard-message" class="message" aria-live="polite"></p>
@@ -99,6 +99,44 @@
                 </button>
                 <button id="save-edit" class="primary-button" type="submit">
                     Save Changes
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog
+        id="delete-contact-dialog"
+        class="contact-dialog"
+        aria-labelledby="delete-contact-title"
+        aria-describedby="delete-contact-description"
+    >
+        <form id="delete-contact-form" class="contact-form">
+            <div class="dialog-header">
+                <h2 id="delete-contact-title">Delete Contact</h2>
+                <button
+                    id="close-delete-dialog"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close delete contact confirmation"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <p id="delete-contact-description" class="confirmation-text">
+                Are you sure you want to delete
+                <strong id="delete-contact-name">this contact</strong>?
+                This action cannot be undone.
+            </p>
+
+            <p id="delete-contact-message" class="message" role="status" aria-live="polite"></p>
+
+            <div class="dialog-actions">
+                <button id="cancel-delete" class="secondary-button" type="button">
+                    Cancel
+                </button>
+                <button id="confirm-delete" class="danger-button" type="submit">
+                    Delete Contact
                 </button>
             </div>
         </form>

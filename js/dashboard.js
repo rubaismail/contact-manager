@@ -18,6 +18,13 @@ const editContactMessage = document.getElementById("edit-contact-message");
 const closeEditDialogButton = document.getElementById("close-edit-dialog");
 const cancelEditButton = document.getElementById("cancel-edit");
 const saveEditButton = document.getElementById("save-edit");
+const deleteContactDialog = document.getElementById("delete-contact-dialog");
+const deleteContactForm = document.getElementById("delete-contact-form");
+const deleteContactName = document.getElementById("delete-contact-name");
+const deleteContactMessage = document.getElementById("delete-contact-message");
+const closeDeleteDialogButton = document.getElementById("close-delete-dialog");
+const cancelDeleteButton = document.getElementById("cancel-delete");
+const confirmDeleteButton = document.getElementById("confirm-delete");
 
 const dashboardState = {
     page: 1,
@@ -28,6 +35,8 @@ const dashboardState = {
 
 let activeRequest = null;
 let contactBeingEdited = null;
+let contactBeingDeleted = null;
+let deleteInProgress = false;
 
 function setContactStatus(message, type = "") {
     contactStatus.textContent = message;
@@ -95,6 +104,31 @@ function closeEditDialog() {
     editContactDialog.close();
 }
 
+function setDeleteMessage(message, type = "") {
+    deleteContactMessage.textContent = message;
+    deleteContactMessage.classList.remove("error", "success");
+
+    if (type) {
+        deleteContactMessage.classList.add(type);
+    }
+}
+
+function openDeleteDialog(contact) {
+    const fullName = `${contact.FirstName || ""} ${contact.LastName || ""}`.trim();
+
+    contactBeingDeleted = contact;
+    deleteContactName.textContent = fullName || "this contact";
+    setDeleteMessage("");
+    deleteContactDialog.showModal();
+    cancelDeleteButton.focus();
+}
+
+function closeDeleteDialog() {
+    if (!deleteInProgress && deleteContactDialog.open) {
+        deleteContactDialog.close();
+    }
+}
+
 function createContactCard(contact) {
     const listItem = document.createElement("li");
     const card = document.createElement("article");
@@ -128,9 +162,11 @@ function createContactCard(contact) {
     deleteButton.className = "danger-button";
     deleteButton.type = "button";
     deleteButton.textContent = "Delete";
-    deleteButton.disabled = true;
     deleteButton.dataset.contactId = contact.ID;
     deleteButton.setAttribute("aria-label", `Delete ${fullName || "contact"}`);
+    deleteButton.addEventListener("click", function () {
+        openDeleteDialog(contact);
+    });
 
     actions.append(editButton, deleteButton);
     card.append(heading, details, actions);
@@ -343,6 +379,103 @@ editContactDialog.addEventListener("close", function () {
     contactBeingEdited = null;
     editContactForm.reset();
     setEditMessage("");
+});
+
+deleteContactForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (!contactBeingDeleted) {
+        setDeleteMessage("Unable to identify this contact. Please close the dialog and try again.", "error");
+        return;
+    }
+
+    const contactID = Number(contactBeingDeleted.ID);
+    const deletedContactName = deleteContactName.textContent;
+    const pageAfterDelete = contactList.children.length === 1 && dashboardState.page > 1
+        ? dashboardState.page - 1
+        : dashboardState.page;
+
+    deleteInProgress = true;
+    setDeleteMessage("Deleting contact...");
+    confirmDeleteButton.disabled = true;
+    cancelDeleteButton.disabled = true;
+    closeDeleteDialogButton.disabled = true;
+
+    try {
+        const response = await fetch("LAMPAPI/DeleteContact.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({
+                ID: contactID
+            })
+        });
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new Error("Unable to delete this contact. Please try again.");
+        }
+
+        if (response.status === 401) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || "Unable to delete this contact.");
+        }
+
+        deleteInProgress = false;
+        closeDeleteDialog();
+
+        const contactsReloaded = await loadContacts(
+            pageAfterDelete,
+            dashboardState.query
+        );
+
+        if (contactsReloaded) {
+            setContactStatus(
+                data.message || `${deletedContactName} was deleted successfully.`,
+                "success"
+            );
+        }
+    } catch (error) {
+        const message = error instanceof Error
+            ? error.message
+            : "Unable to delete this contact.";
+
+        setDeleteMessage(message, "error");
+    } finally {
+        deleteInProgress = false;
+        confirmDeleteButton.disabled = false;
+        cancelDeleteButton.disabled = false;
+        closeDeleteDialogButton.disabled = false;
+    }
+});
+
+closeDeleteDialogButton.addEventListener("click", closeDeleteDialog);
+cancelDeleteButton.addEventListener("click", closeDeleteDialog);
+
+deleteContactDialog.addEventListener("click", function (event) {
+    if (event.target === deleteContactDialog) {
+        closeDeleteDialog();
+    }
+});
+
+deleteContactDialog.addEventListener("cancel", function (event) {
+    if (deleteInProgress) {
+        event.preventDefault();
+    }
+});
+
+deleteContactDialog.addEventListener("close", function () {
+    contactBeingDeleted = null;
+    setDeleteMessage("");
 });
 
 searchForm.addEventListener("submit", function (event) {
