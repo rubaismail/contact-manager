@@ -73,6 +73,12 @@ loginForm.addEventListener("submit", async function (event) {
     }
 
     if (!valid) {
+        if (username.value.trim() === "") {
+            username.focus();
+        } else {
+            password.focus();
+        }
+
         return;
     }
 
@@ -170,6 +176,18 @@ registerForm.addEventListener("submit", async function (event) {
     }
 
     if (!valid) {
+        if (firstName.value.trim() === "") {
+            firstName.focus();
+        } else if (lastName.value.trim() === "") {
+            lastName.focus();
+        } else if (username.value.trim() === "") {
+            username.focus();
+        } else if (password.value.trim() === "") {
+            password.focus();
+        } else {
+            confirmPassword.focus();
+        }
+
         return;
     }
 
