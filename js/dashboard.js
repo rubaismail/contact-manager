@@ -8,6 +8,17 @@ const pagination = document.getElementById("pagination");
 const previousPageButton = document.getElementById("previous-page");
 const nextPageButton = document.getElementById("next-page");
 const pageSummary = document.getElementById("page-summary");
+const addContactButton = document.getElementById("add-contact-button");
+const addContactDialog = document.getElementById("add-contact-dialog");
+const addContactForm = document.getElementById("add-contact-form");
+const addFirstName = document.getElementById("add-first-name");
+const addLastName = document.getElementById("add-last-name");
+const addPhone = document.getElementById("add-phone");
+const addEmail = document.getElementById("add-email");
+const addContactMessage = document.getElementById("add-contact-message");
+const closeAddDialogButton = document.getElementById("close-add-dialog");
+const cancelAddButton = document.getElementById("cancel-add");
+const saveContactButton = document.getElementById("save-contact");
 const editContactDialog = document.getElementById("edit-contact-dialog");
 const editContactForm = document.getElementById("edit-contact-form");
 const editFirstName = document.getElementById("edit-first-name");
@@ -34,6 +45,7 @@ const dashboardState = {
 };
 
 let activeRequest = null;
+let addInProgress = false;
 let contactBeingEdited = null;
 let contactBeingDeleted = null;
 let deleteInProgress = false;
@@ -78,6 +90,64 @@ function formatCreatedDate(value) {
         month: "short",
         day: "numeric"
     });
+}
+
+function normalizePhoneNumber(value) {
+    const trimmedValue = value.trim();
+
+    if (!/^[0-9()\-\s]+$/.test(trimmedValue)) {
+        return null;
+    }
+
+    const digits = trimmedValue.replace(/\D/g, "");
+
+    if (digits.length !== 10) {
+        return null;
+    }
+
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+function formatPhoneNumber(value) {
+    if (!value) {
+        return value;
+    }
+
+    return normalizePhoneNumber(String(value)) || value;
+}
+
+function normalizeSearchQuery(value) {
+    const trimmedValue = value.trim();
+
+    if (!/^[0-9()\-\s]+$/.test(trimmedValue)) {
+        return trimmedValue;
+    }
+
+    const digits = trimmedValue.replace(/\D/g, "");
+
+    return digits ? digits.split("").join("%") : trimmedValue;
+}
+
+function setAddMessage(message, type = "") {
+    addContactMessage.textContent = message;
+    addContactMessage.classList.remove("error", "success");
+
+    if (type) {
+        addContactMessage.classList.add(type);
+    }
+}
+
+function openAddDialog() {
+    addContactForm.reset();
+    setAddMessage("");
+    addContactDialog.showModal();
+    addFirstName.focus();
+}
+
+function closeAddDialog() {
+    if (!addInProgress && addContactDialog.open) {
+        addContactDialog.close();
+    }
 }
 
 function setEditMessage(message, type = "") {
@@ -144,7 +214,7 @@ function createContactCard(contact) {
     details.className = "contact-details";
     details.append(
         createContactDetail("Email", contact.Email),
-        createContactDetail("Phone", contact.Phone),
+        createContactDetail("Phone", formatPhoneNumber(contact.Phone)),
         createContactDetail("Created", formatCreatedDate(contact.DateCreated))
     );
 
@@ -238,7 +308,7 @@ async function loadContacts(page = 1, query = dashboardState.query) {
             credentials: "same-origin",
             signal: requestController.signal,
             body: JSON.stringify({
-                query: query,
+                query: normalizeSearchQuery(query),
                 page: page,
                 limit: dashboardState.limit
             })
@@ -289,6 +359,115 @@ async function loadContacts(page = 1, query = dashboardState.query) {
     }
 }
 
+addContactForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const newContact = {
+        FirstName: addFirstName.value.trim(),
+        LastName: addLastName.value.trim(),
+        Phone: addPhone.value.trim(),
+        Email: addEmail.value.trim()
+    };
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!newContact.FirstName || !newContact.LastName ||
+        !newContact.Phone || !newContact.Email) {
+        setAddMessage("Please complete every field.", "error");
+        return;
+    }
+
+    if (!emailPattern.test(newContact.Email)) {
+        setAddMessage("Enter a valid email address.", "error");
+        addEmail.focus();
+        return;
+    }
+
+    const normalizedPhone = normalizePhoneNumber(newContact.Phone);
+
+    if (!normalizedPhone) {
+        setAddMessage("Enter a 10-digit phone number.", "error");
+        addPhone.focus();
+        return;
+    }
+
+    newContact.Phone = normalizedPhone;
+
+    addInProgress = true;
+    setAddMessage("Adding contact...");
+    saveContactButton.disabled = true;
+    cancelAddButton.disabled = true;
+    closeAddDialogButton.disabled = true;
+
+    try {
+        const response = await fetch("LAMPAPI/AddContact.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(newContact)
+        });
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new Error("Unable to add this contact. Please try again.");
+        }
+
+        if (response.status === 401) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || "Unable to add this contact.");
+        }
+
+        addInProgress = false;
+        closeAddDialog();
+
+        const contactsReloaded = await loadContacts(1, dashboardState.query);
+
+        if (contactsReloaded) {
+            setContactStatus(data.message || "Contact added successfully.", "success");
+        }
+    } catch (error) {
+        const message = error instanceof Error
+            ? error.message
+            : "Unable to add this contact.";
+
+        setAddMessage(message, "error");
+    } finally {
+        addInProgress = false;
+        saveContactButton.disabled = false;
+        cancelAddButton.disabled = false;
+        closeAddDialogButton.disabled = false;
+    }
+});
+
+addContactButton.addEventListener("click", openAddDialog);
+closeAddDialogButton.addEventListener("click", closeAddDialog);
+cancelAddButton.addEventListener("click", closeAddDialog);
+
+addContactDialog.addEventListener("click", function (event) {
+    if (event.target === addContactDialog) {
+        closeAddDialog();
+    }
+});
+
+addContactDialog.addEventListener("cancel", function (event) {
+    if (addInProgress) {
+        event.preventDefault();
+    }
+});
+
+addContactDialog.addEventListener("close", function () {
+    addContactForm.reset();
+    setAddMessage("");
+});
+
 editContactForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -310,6 +489,16 @@ editContactForm.addEventListener("submit", async function (event) {
         setEditMessage("Please complete every field.", "error");
         return;
     }
+
+    const normalizedPhone = normalizePhoneNumber(updatedContact.Phone);
+
+    if (!normalizedPhone) {
+        setEditMessage("Enter a 10-digit phone number.", "error");
+        editPhone.focus();
+        return;
+    }
+
+    updatedContact.Phone = normalizedPhone;
 
     setEditMessage("Saving changes...");
     saveEditButton.disabled = true;
