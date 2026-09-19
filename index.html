@@ -1,5 +1,82 @@
-<html>
-	<body>
-		<h1>We love COP 4331</h1>
-	</body>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Contact Manager</h1>
+        <p>Manage your contacts in one place.</p>
+
+        <div class="auth-card">
+
+            <div class="tabs">
+                <button type="button" id="login-tab" class="active">
+                    Login
+                </button>
+
+                <button type="button" id="register-tab">
+                    Register
+                </button>
+            </div>
+
+            <form id="login-form">
+
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username">
+                <p class="error" id="login-username-error" aria-live="polite"></p>
+
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password">
+                <p class="error" id="login-password-error" aria-live="polite"></p>
+
+                <p class="message" id="login-message" aria-live="polite"></p>
+
+                <button type="submit" class="submit-button">
+                    Log In
+                </button>
+
+            </form>
+
+            <form id="register-form" class="hidden">
+
+                <label for="first-name">First Name</label>
+                <input type="text" id="first-name">
+                <p class="error" id="first-name-error" aria-live="polite"></p>
+
+                <label for="last-name">Last Name</label>
+                <input type="text" id="last-name">
+                <p class="error" id="last-name-error" aria-live="polite"></p>
+
+                <label for="register-username">Username</label>
+                <input type="text" id="register-username">
+                <p class="error" id="register-username-error" aria-live="polite"></p>
+
+                <label for="register-password">Password</label>
+                <input type="password" id="register-password">
+                <p class="error" id="register-password-error" aria-live="polite"></p>
+
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password">
+                <p class="error" id="confirm-password-error" aria-live="polite"></p>
+
+                <p class="message" id="register-message" aria-live="polite"></p>
+
+                <button type="submit" class="submit-button">
+                    Create Account
+                </button>
+
+            </form>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+
+</body>
+
 </html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacts</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="dashboard-page">
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <div>
+                <h1>Contacts</h1>
+                <p>Manage your contacts below.</p>
+            </div>
+
+            <button id="logout-button" class="secondary-button" type="button">
+                Log Out
+            </button>
+        </header>
+
+        <section class="dashboard-toolbar" aria-label="Contact controls">
+            <form id="search-form" class="search-form" role="search">
+                <label class="visually-hidden" for="contact-search">
+                    Search contacts
+                </label>
+                <input
+                    id="contact-search"
+                    type="search"
+                    placeholder="Search by name, email, or phone"
+                    autocomplete="off"
+                >
+                <button id="search-button" class="secondary-button" type="submit">
+                    Search
+                </button>
+                <button id="clear-search" class="secondary-button hidden" type="button">
+                    Clear
+                </button>
+            </form>
+
+            <button id="add-contact-button" class="primary-button" type="button">
+                Add Contact
+            </button>
+        </section>
+
+        <p id="dashboard-message" class="message" aria-live="polite"></p>
+        <p id="contact-status" class="dashboard-status" role="status" aria-live="polite"></p>
+
+        <ul id="contact-list" class="contact-list" aria-label="Your contacts"></ul>
+
+        <nav id="pagination" class="pagination hidden" aria-label="Contact pages">
+            <button id="previous-page" class="secondary-button" type="button">
+                Previous
+            </button>
+            <span id="page-summary" aria-live="polite"></span>
+            <button id="next-page" class="secondary-button" type="button">
+                Next
+            </button>
+        </nav>
+    </main>
+
+    <dialog id="add-contact-dialog" class="contact-dialog" aria-labelledby="add-contact-title">
+        <form id="add-contact-form" class="contact-form" novalidate>
+            <div class="dialog-header">
+                <h2 id="add-contact-title">Add Contact</h2>
+                <button
+                    id="close-add-dialog"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close add contact form"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <label for="add-first-name">First Name</label>
+            <input id="add-first-name" type="text" maxlength="50" autocomplete="given-name" required>
+
+            <label for="add-last-name">Last Name</label>
+            <input id="add-last-name" type="text" maxlength="50" autocomplete="family-name" required>
+
+            <label for="add-phone">Phone</label>
+            <input
+                id="add-phone"
+                type="tel"
+                maxlength="50"
+                autocomplete="tel"
+                placeholder="e.g., 407-555-1234"
+                required
+            >
+
+            <label for="add-email">Email</label>
+            <input
+                id="add-email"
+                type="email"
+                maxlength="100"
+                autocomplete="email"
+                placeholder="name@example.com"
+                required
+            >
+
+            <p id="add-contact-message" class="message" role="status" aria-live="polite"></p>
+
+            <div class="dialog-actions">
+                <button id="cancel-add" class="secondary-button" type="button">
+                    Cancel
+                </button>
+                <button id="save-contact" class="primary-button" type="submit">
+                    Add Contact
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="edit-contact-dialog" class="contact-dialog" aria-labelledby="edit-contact-title">
+        <form id="edit-contact-form" class="contact-form" novalidate>
+            <div class="dialog-header">
+                <h2 id="edit-contact-title">Edit Contact</h2>
+                <button
+                    id="close-edit-dialog"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close edit contact form"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <label for="edit-first-name">First Name</label>
+            <input id="edit-first-name" type="text" maxlength="50" required>
+
+            <label for="edit-last-name">Last Name</label>
+            <input id="edit-last-name" type="text" maxlength="50" required>
+
+            <label for="edit-phone">Phone</label>
+            <input
+                id="edit-phone"
+                type="tel"
+                maxlength="50"
+                autocomplete="tel"
+                placeholder="e.g., 407-555-1234"
+                required
+            >
+
+            <label for="edit-email">Email</label>
+            <input
+                id="edit-email"
+                type="email"
+                maxlength="100"
+                placeholder="name@example.com"
+                required
+            >
+
+            <p id="edit-contact-message" class="message" role="status" aria-live="polite"></p>
+
+            <div class="dialog-actions">
+                <button id="cancel-edit" class="secondary-button" type="button">
+                    Cancel
+                </button>
+                <button id="save-edit" class="primary-button" type="submit">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog
+        id="delete-contact-dialog"
+        class="contact-dialog"
+        aria-labelledby="delete-contact-title"
+        aria-describedby="delete-contact-description"
+    >
+        <form id="delete-contact-form" class="contact-form">
+            <div class="dialog-header">
+                <h2 id="delete-contact-title">Delete Contact</h2>
+                <button
+                    id="close-delete-dialog"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close delete contact confirmation"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <p id="delete-contact-description" class="confirmation-text">
+                Are you sure you want to delete
+                <strong id="delete-contact-name">this contact</strong>?
+                This action cannot be undone.
+            </p>
+
+            <p id="delete-contact-message" class="message" role="status" aria-live="polite"></p>
+
+            <div class="dialog-actions">
+                <button id="cancel-delete" class="secondary-button" type="button">
+                    Cancel
+                </button>
+                <button id="confirm-delete" class="danger-button" type="submit">
+                    Delete Contact
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/logout.js"></script>
+</body>
+
+</html>
