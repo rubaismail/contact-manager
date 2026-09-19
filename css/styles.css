@@ -134,3 +134,384 @@ input:focus {
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.dashboard-page {
+    align-items: flex-start;
+    padding: 3rem 0;
+}
+
+.dashboard-container {
+    width: 90%;
+    max-width: 960px;
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-header p {
+    color: #6b7280;
+}
+
+.dashboard-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.search-form {
+    display: flex;
+    flex: 1;
+    gap: 0.5rem;
+}
+
+.search-form input {
+    margin: 0;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button {
+    padding: 0.7rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.primary-button {
+    color: white;
+    background-color: #2563eb;
+    border: 1px solid #2563eb;
+}
+
+.secondary-button {
+    color: #1f2937;
+    background-color: white;
+    border: 1px solid #d1d5db;
+}
+
+.danger-button {
+    color: #b91c1c;
+    background-color: white;
+    border: 1px solid #fecaca;
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+    background-color: #1d4ed8;
+}
+
+.secondary-button:hover:not(:disabled),
+.secondary-button:focus-visible:not(:disabled) {
+    background-color: #f3f4f6;
+}
+
+.danger-button:hover:not(:disabled),
+.danger-button:focus-visible:not(:disabled) {
+    background-color: #fef2f2;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.danger-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.feature-note {
+    margin-top: 0.6rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.dashboard-status {
+    min-height: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.contact-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    list-style: none;
+}
+
+.dashboard-contact-card {
+    height: 100%;
+    padding: 1.25rem;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.dashboard-contact-card h2 {
+    margin-bottom: 1rem;
+    color: #2563eb;
+    font-size: 1.2rem;
+}
+
+.contact-details > div {
+    margin-bottom: 0.8rem;
+}
+
+.contact-details dt {
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.contact-details dd {
+    margin-top: 0.2rem;
+    overflow-wrap: anywhere;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.contact-actions button {
+    flex: 1;
+}
+
+.contact-dialog {
+    width: min(90%, 480px);
+    padding: 0;
+    margin: auto;
+    color: #1f2937;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.contact-dialog::backdrop {
+    background-color: rgb(17 24 39 / 55%);
+}
+
+.contact-form {
+    padding: 1.5rem;
+}
+
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.dialog-header h2 {
+    color: #2563eb;
+}
+
+.icon-button {
+    padding: 0.25rem 0.5rem;
+    color: #6b7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.icon-button:hover:not(:disabled),
+.icon-button:focus-visible:not(:disabled) {
+    color: #1f2937;
+}
+
+.icon-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.contact-form input {
+    margin-bottom: 1rem;
+}
+
+.contact-form .message {
+    margin-bottom: 0.5rem;
+}
+
+.confirmation-text {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.pagination.hidden {
+    display: none;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 2rem 0;
+    }
+
+    .container,
+    .dashboard-container {
+        width: calc(100% - 2rem);
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
+
+    .dashboard-page {
+        padding: 2rem 0;
+    }
+
+    .dashboard-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-header > div,
+    .search-form {
+        min-width: 0;
+    }
+
+    .dashboard-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .search-form {
+        width: 100%;
+    }
+
+    .search-form input {
+        min-width: 0;
+    }
+
+    #add-contact-button {
+        width: 100%;
+    }
+
+    .contact-dialog {
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    body,
+    .dashboard-page {
+        padding: 1.25rem 0;
+    }
+
+    .container,
+    .dashboard-container {
+        width: calc(100% - 1.5rem);
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    input {
+        font-size: 1rem;
+    }
+
+    .auth-card,
+    .contact-form {
+        padding: 1.25rem;
+    }
+
+    .dashboard-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #logout-button {
+        width: 100%;
+    }
+
+    .search-form,
+    .dialog-actions {
+        flex-direction: column;
+    }
+
+    .search-form button,
+    .dialog-actions button {
+        width: 100%;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .danger-button,
+    .submit-button,
+    .tabs button {
+        min-height: 44px;
+    }
+
+    .contact-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dashboard-contact-card {
+        min-width: 0;
+        padding: 1rem;
+    }
+
+    .contact-dialog {
+        width: calc(100% - 1.5rem);
+        max-height: calc(100vh - 1.5rem);
+    }
+
+    .pagination {
+        gap: 0.5rem;
+    }
+
+    .pagination button {
+        flex: 1;
+        min-width: 0;
+    }
+
+    #page-summary {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 360px) {
+    .contact-actions {
+        flex-direction: column;
+    }
+}
