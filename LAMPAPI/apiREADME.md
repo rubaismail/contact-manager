@@ -48,7 +48,7 @@ Common status codes:
 
 ## Authentication
 
-`Login.php` creates a PHP session after verifying the submitted password. Clients must retain and resend the resulting `PHPSESSID` cookie when calling protected endpoints.
+`Login.php` creates a PHP session after verifying the submitted password. Clients must retain and resend the resulting `PHPSESSID` cookie when calling protected endpoints. On HTTPS deployments, the cookie is sent with `Secure`, `HttpOnly`, and `SameSite=Lax` attributes.
 
 ## Endpoints
 

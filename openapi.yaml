@@ -11,7 +11,7 @@ info:
     calling protected contact endpoints.
 
 servers:
-  - url: http://team11.store
+  - url: https://team11.store
     description: Deployed Contact Manager server
 
 tags:
@@ -92,7 +92,7 @@ paths:
               description: PHP session cookie used by protected endpoints
               schema:
                 type: string
-                example: PHPSESSID=example-session-id; Path=/; HttpOnly
+                example: PHPSESSID=example-session-id; Path=/; Secure; HttpOnly; SameSite=Lax
           content:
             application/json:
               schema:

@@ -2,7 +2,7 @@
 
 A full-stack contact management web application built for the COP 4331C Small Project. Users can create an account, log in, and securely manage their own contacts through a responsive web interface.
 
-Live application: [team11.store](http://team11.store/)
+Live application: [team11.store](https://team11.store/)
 
 ## Features
 
@@ -92,6 +92,34 @@ DB_PASSWORD="replace-with-the-application-password"
 Do not commit `.env`. In production, keep it outside the public document root and update the path used by `LAMPAPI/config.php` accordingly.
 
 Configure Apache to serve the project directory, then open the configured URL in a browser.
+
+### Production HTTPS and security headers
+
+The root `.htaccess` file redirects the production domain to the canonical
+`https://team11.store` origin and supplies CSP, HSTS, clickjacking, MIME,
+referrer, permissions, and cross-origin security headers. Enable the required
+Apache modules and allow overrides for the application directory:
+
+```dotenv
+APP_URL=https://team11.store/
+```
+
+```bash
+sudo a2enmod headers rewrite
+sudo systemctl reload apache2
+```
+
+The Apache virtual host must include `AllowOverride All` for the deployed
+application directory. Issue a certificate for both public hostnames so the
+browser can securely reach `www` before Apache redirects it:
+
+```bash
+sudo certbot --apache -d team11.store -d www.team11.store
+```
+
+Confirm that Certbot's renewal timer is active with
+`sudo systemctl status certbot.timer`. PHP session cookies automatically use
+`Secure` on HTTPS requests and always use `HttpOnly` and `SameSite=Lax`.
 
 ## API
 

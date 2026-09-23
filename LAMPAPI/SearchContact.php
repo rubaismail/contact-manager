@@ -40,7 +40,7 @@ $stmt = $conn->prepare(
      FROM Contacts
      WHERE UserID = ?
        AND (FirstName LIKE ? OR LastName LIKE ? OR Phone LIKE ? OR Email LIKE ?)
-     ORDER BY LastName, FirstName
+     ORDER BY LastName, FirstName, ID
      LIMIT ? OFFSET ?'
 );
 $stmt->bind_param(

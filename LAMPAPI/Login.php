@@ -24,9 +24,13 @@ if (!$row || !password_verify($password, $row['Password'])) {
     exit();
 }
 
-session_regenerate_id(true);
+if (!session_regenerate_id(true)) {
+    throw new RuntimeException('Unable to regenerate session ID');
+}
+
 $_SESSION['valid'] = true;
 $_SESSION['userId'] = (int) $row['ID'];
+replaceSessionCookie();
 
 sendSuccess([
     'ID' => (int) $row['ID'],
