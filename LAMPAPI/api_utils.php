@@ -2,6 +2,49 @@
 
 // Shared request, response, error, and authentication helpers.
 
+function requestUsesHttps(): bool
+{
+    $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+
+    return ($https !== '' && $https !== 'off')
+        || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443';
+}
+
+function sessionCookieOptions(?int $expires = null): array
+{
+    $params = session_get_cookie_params();
+
+    return [
+        'expires' => $expires ?? 0,
+        'path' => $params['path'] ?: '/',
+        'domain' => $params['domain'],
+        'secure' => $params['secure'],
+        'httponly' => true,
+        'samesite' => $params['samesite'] ?: 'Lax'
+    ];
+}
+
+function replaceSessionCookie(): void
+{
+    // session_start() and session_regenerate_id() can each queue a cookie.
+    // Send only the final, authenticated session ID to clients.
+    header_remove('Set-Cookie');
+    setcookie(session_name(), session_id(), sessionCookieOptions());
+}
+
+function destroySession(): void
+{
+    session_unset();
+    session_destroy();
+
+    header_remove('Set-Cookie');
+    setcookie(
+        session_name(),
+        '',
+        sessionCookieOptions(time() - 42000)
+    );
+}
+
 set_exception_handler(function (Throwable $exception): void {
     error_log(sprintf(
         'Unhandled API exception: %s in %s:%d',
@@ -15,6 +58,14 @@ set_exception_handler(function (Throwable $exception): void {
 });
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    ini_set('session.use_strict_mode', '1');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => requestUsesHttps(),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 
