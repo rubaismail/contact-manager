@@ -1,6 +1,6 @@
 # Contact Manager API
 
-The PHP API accepts JSON requests and returns JSON responses. Endpoint paths and JSON field names are case-sensitive.
+The PHP API accepts JSON requests and returns JSON responses. Endpoint paths and JSON field names are case sensitive.
 
 ## Request requirements
 
