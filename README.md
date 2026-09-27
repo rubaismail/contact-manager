@@ -167,16 +167,6 @@ The database enforces the one-to-many ownership relationship with a foreign key.
 - The application database account receives only required CRUD privileges.
 - Production deployments should use HTTPS and secure, HTTP-only session cookies.
 
-## Testing
-
-API endpoints can be tested through SwaggerHub, Postman, or `curl`. Tests should cover successful requests, validation failures, authentication, ownership enforcement, pagination, and database errors.
-
-Before submitting changes:
-
-```bash
-git diff --check
-```
-
 ## Deployment
 
 After changes are merged into `main`, update the server checkout:
